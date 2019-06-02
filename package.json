@@ -1,0 +1,22 @@
+{
+	"name": "task-manager-app",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"dev": "env-cmd -f ./dev.env nodemon src/index.js",
+		"test": "env-cmd -f ./test.env jest --watch --runInBand"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"express": "^4.17.1"
+	},
+	"devDependencies": {
+		"env-cmd": "^9.0.2",
+		"jest": "^24.8.0",
+		"nodemon": "^1.19.1",
+		"supertest": "^4.0.2"
+	}
+}
