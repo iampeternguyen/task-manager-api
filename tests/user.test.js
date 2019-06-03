@@ -128,33 +128,27 @@ describe('Updating Users', () => {
 
 	test('Should be able to update user name, email, and password by id', async () => {
 		const userBefore = await User.findById(userOne._id);
-		const nameBefore = userBefore.name;
-		const emailBefore = userBefore.email;
-		const passwordBefore = userBefore.password;
+
 		await request(app)
 			.patch(`/user/${userOne._id}`)
 			.send({ name: 'New Name', email: 'newemail@example.com', password: 'newpass1234' })
 			.expect(200);
-		const userAfter = await User.findById(userOne._id);
-		const nameAfter = userAfter.name;
-		const emailAfter = userAfter.email;
-		const passwordAfter = userAfter.password;
 
-		expect(nameBefore).not.toBe(nameAfter);
-		expect(emailBefore).not.toBe(emailAfter);
-		expect(passwordBefore).not.toBe(passwordAfter);
+		const userAfter = await User.findById(userOne._id);
+
+		expect(userBefore.name).not.toBe(userAfter.name);
+		expect(userBefore.email).not.toBe(userAfter.email);
+		expect(userBefore.password).not.toBe(userAfter.password);
 	});
 
 	test('Should not be able to update user id', async () => {
 		const userBefore = await User.findOne({ email: userOne.email });
-		const idBefore = userBefore._id;
 		await request(app)
 			.patch(`/user/${userOne._id}`)
 			.send({ _id: new mongoose.Types.ObjectId() })
 			.expect(400);
 		const userAfter = await User.findOne({ email: userOne.email });
-		const idAfter = userAfter._id;
-		expect(idBefore).toEqual(idAfter);
+		expect(userBefore._id).toEqual(userAfter._id);
 	});
 
 	test('Should encrypt password', async () => {
