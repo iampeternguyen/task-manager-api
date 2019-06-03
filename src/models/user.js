@@ -39,6 +39,12 @@ userSchema.pre('save', async function(next) {
 	next();
 });
 
+userSchema.methods.toJSON = function() {
+	const dupUser = this.toObject();
+	delete dupUser.password;
+	return dupUser;
+};
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
