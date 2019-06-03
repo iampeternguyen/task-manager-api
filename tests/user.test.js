@@ -119,39 +119,33 @@ describe('Reading Users', () => {
 describe('Updating Users', () => {
 	beforeEach(setUpDatabase);
 
-	test('Should be able to update user name', async () => {
-		const nameBefore = await User.findById(userOne._id).name;
+	test('Should be able to update user name, email, and password by id', async () => {
+		const userBefore = await User.findById(userOne._id);
+		const nameBefore = userBefore.name;
+		const emailBefore = userBefore.email;
+		const passwordBefore = userBefore.password;
 		await request(app)
-			.update(`/user/${userOne._id}`)
-			.send({ name: 'New Name' });
-		const nameAfter = await User.findById(userOne._id).name;
+			.patch(`/user/${userOne._id}`)
+			.send({ name: 'New Name', email: 'newemail@example.com', password: 'newpass1234' });
+		const userAfter = await User.findById(userOne._id);
+		const nameAfter = userAfter.name;
+		const emailAfter = userAfter.email;
+		const passwordAfter = userAfter.password;
+
 		expect(nameBefore).not.toBe(nameAfter);
-	});
-
-	test('Should be able to update user email', async () => {
-		const emailBefore = await User.findById(userOne._id).email;
-		await request(app)
-			.update(`/user/${userOne._id}`)
-			.send({ email: 'newemail@example.com' });
-		const emailAfter = await User.findById(userOne._id).email;
 		expect(emailBefore).not.toBe(emailAfter);
-	});
-
-	test('Should be able to update user password', async () => {
-		const passwordBefore = await User.findById(userOne._id).password;
-		await request(app)
-			.update(`/user/${userOne._id}`)
-			.send({ password: 'newpass123' });
-		const passwordAfter = await User.findById(userOne._id).password;
 		expect(passwordBefore).not.toBe(passwordAfter);
 	});
 
 	test('Should not be able to update user id', async () => {
-		const idBefore = await User.findOne({ email: userOne.email })._id;
+		const userBefore = await User.findOne({ email: userOne.email });
+		const idBefore = userBefore._id;
 		await request(app)
-			.update(`/user/${userOne._id}`)
-			.send({ name: 'New Name' });
-		const idAfter = await User.findOne({ email: userOne.email })._id;
-		expect(idBefore).not.toBe(idAfter);
+			.patch(`/user/${userOne._id}`)
+			.send({ _id: new mongoose.Types.ObjectId() })
+			.expect(400);
+		const userAfter = await User.findOne({ email: userOne.email });
+		const idAfter = userAfter._id;
+		expect(idBefore).toEqual(idAfter);
 	});
 });
