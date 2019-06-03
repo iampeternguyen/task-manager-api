@@ -16,6 +16,10 @@ router.post('/user', async (req, res) => {
 router.get('/user/:id', async (req, res) => {
 	const id = req.params.id;
 	const user = await User.findById(id);
+
+	if (!user) {
+		return res.status(404).send();
+	}
 	res.send(user);
 });
 
@@ -24,6 +28,10 @@ router.patch('/user/:id', async (req, res) => {
 	const allowedUpdates = ['name', 'email', 'password'];
 	const updates = Object.keys(req.body);
 	const user = await User.findById(id);
+
+	if (!user) {
+		return res.status(404).send();
+	}
 
 	const isValidUpdate = updates.every(update => allowedUpdates.includes(update));
 

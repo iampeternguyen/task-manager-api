@@ -114,6 +114,13 @@ describe('Reading Users', () => {
 	test('Should not return password', async () => {
 		expect(response.body.password).toBeUndefined();
 	});
+
+	test('Should return 404 for invalid id', async () => {
+		await request(app)
+			.get(`/user/${new mongoose.Types.ObjectId()}`)
+			.send()
+			.expect(404);
+	});
 });
 
 describe('Updating Users', () => {
@@ -149,6 +156,22 @@ describe('Updating Users', () => {
 		const idAfter = userAfter._id;
 		expect(idBefore).toEqual(idAfter);
 	});
+
+	test('Should encrypt password', async () => {
+		await request(app)
+			.patch(`/user/${userOne._id}`)
+			.send({ password: 'newpass1234' })
+			.expect(200);
+		const user = await User.findById(userOne._id);
+		expect(user.password).not.toBe('newpass1234');
+	});
+
+	test('Should return 404 for invalid id', async () => {
+		await request(app)
+			.patch(`/user/${new mongoose.Types.ObjectId()}`)
+			.send({ email: 'newemail@example.com' })
+			.expect(404);
+	});
 });
 
 describe('Deleting User', () => {
@@ -165,6 +188,7 @@ describe('Deleting User', () => {
 	test('Should return 404 for invalid id', async () => {
 		await request(app)
 			.delete(`/user/${new mongoose.Types.ObjectId()}`)
+			.send()
 			.expect(404);
 	});
 });
