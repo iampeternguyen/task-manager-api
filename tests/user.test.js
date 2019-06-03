@@ -126,7 +126,8 @@ describe('Updating Users', () => {
 		const passwordBefore = userBefore.password;
 		await request(app)
 			.patch(`/user/${userOne._id}`)
-			.send({ name: 'New Name', email: 'newemail@example.com', password: 'newpass1234' });
+			.send({ name: 'New Name', email: 'newemail@example.com', password: 'newpass1234' })
+			.expect(200);
 		const userAfter = await User.findById(userOne._id);
 		const nameAfter = userAfter.name;
 		const emailAfter = userAfter.email;
@@ -147,5 +148,23 @@ describe('Updating Users', () => {
 		const userAfter = await User.findOne({ email: userOne.email });
 		const idAfter = userAfter._id;
 		expect(idBefore).toEqual(idAfter);
+	});
+});
+
+describe('Deleting User', () => {
+	beforeEach(setUpDatabase);
+	test('Should delete user by id', async () => {
+		await request(app)
+			.delete(`/user/${userOne._id}`)
+			.expect(200);
+
+		const user = await User.findById(userOne._id);
+		expect(user).toBeNull();
+	});
+
+	test('Should return 404 for invalid id', async () => {
+		await request(app)
+			.delete(`/user/${new mongoose.Types.ObjectId()}`)
+			.expect(404);
 	});
 });
