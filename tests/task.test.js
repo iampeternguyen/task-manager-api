@@ -15,6 +15,12 @@ const taskTwo = {
 	completed: true,
 };
 
+const newTask = {
+	_id: new mongoose.Types.ObjectId(),
+	title: 'new task',
+	description: 'this task is new',
+};
+
 const setUpDatabase = async () => {
 	await Task.deleteMany();
 	await new Task(taskOne).save();
@@ -25,11 +31,6 @@ describe('Adding task', () => {
 	beforeEach(setUpDatabase);
 
 	it('Should add a task', async () => {
-		const newTask = {
-			_id: new mongoose.Types.ObjectId(),
-			title: 'new task',
-			description: 'this task is new',
-		};
 		await request(app)
 			.post('/task')
 			.send(newTask)
@@ -51,5 +52,60 @@ describe('Adding task', () => {
 
 		const task = await Task.findById(id);
 		expect(task).toBeNull();
+	});
+});
+
+describe('Read tasks', () => {
+	beforeEach(setUpDatabase);
+	it('Should read task by id', async () => {
+		const response = await request(app)
+			.get(`/task/${taskOne._id}`)
+			.send()
+			.expect(200);
+		expect(response.body).toMatchObject({ title: taskOne.title });
+	});
+
+	it('Should return 404 for invalid id', async () => {
+		const id = new mongoose.Types.ObjectId();
+		await request(app)
+			.get(`/task/${id}`)
+			.send()
+			.expect(404);
+	});
+});
+
+describe('Updating Tasks', () => {
+	beforeEach(setUpDatabase);
+
+	it('Should update title, description, completed', async () => {
+		await request(app)
+			.patch(`/task/${taskTwo._id}`)
+			.send({ title: 'updated title', description: 'updated description', completed: false })
+			.expect(200);
+
+		const task = await Task.findById(taskTwo._id);
+		expect(task.title).not.toBe(taskTwo.title);
+		expect(task.description).not.toBe(taskTwo.description);
+		expect(task.completed).not.toBe(taskTwo.completed);
+	});
+
+	it('Should not update task if id field is specified', async () => {
+		await request(app)
+			.patch(`/task/${taskTwo._id}`)
+			.send({
+				_id: new mongoose.Types.ObjectId(),
+				title: 'updated title',
+				description: 'updated description',
+				completed: false,
+			})
+			.expect(400);
+	});
+
+	it('Should return 404 for invalid id', async () => {
+		const id = new mongoose.Types.ObjectId();
+		await request(app)
+			.patch(`/task/${id}`)
+			.send(newTask)
+			.expect(404);
 	});
 });
