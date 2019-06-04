@@ -109,3 +109,23 @@ describe('Updating Tasks', () => {
 			.expect(404);
 	});
 });
+
+describe('Delete task', () => {
+	beforeEach(setUpDatabase);
+	it('Should delete a task by ID', async () => {
+		await request(app)
+			.delete(`/task/${taskOne._id}`)
+			.send()
+			.expect(200);
+		const task = await Task.findById(taskOne._id);
+		expect(task).toBeNull();
+	});
+
+	it('Should return 404 for invalid id', async () => {
+		const id = new mongoose.Types.ObjectId();
+		await request(app)
+			.delete(`/task/${id}`)
+			.send()
+			.expect(404);
+	});
+});
