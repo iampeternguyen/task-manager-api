@@ -2,10 +2,13 @@ const express = require('express');
 require('./db/mongoose');
 const app = express();
 
-const userRouter = require('./routers/user');
-
 app.use(express.json());
+
+const userRouter = require('./routers/user');
 app.use(userRouter);
+
+const taskRouter = require('./routers/task');
+app.use(taskRouter);
 
 app.get('/', (req, res) => {
 	res.send(
