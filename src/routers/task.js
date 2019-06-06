@@ -12,6 +12,18 @@ router.post('/task', async (req, res) => {
 	}
 });
 
+router.get('/tasks/all', async (req, res) => {
+	try {
+		const tasks = await Task.find({});
+		if (!tasks) {
+			return res.status(404).send();
+		}
+		res.send(tasks);
+	} catch (error) {
+		res.status(500).send();
+	}
+});
+
 router.get('/task/:id', async (req, res) => {
 	try {
 		const task = await Task.findById(req.params.id);

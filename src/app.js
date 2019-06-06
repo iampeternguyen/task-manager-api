@@ -1,7 +1,9 @@
 const express = require('express');
 require('./db/mongoose');
 const app = express();
+const cors = require('cors');
 
+app.use(cors());
 app.use(express.json());
 
 const userRouter = require('./routers/user');

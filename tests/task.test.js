@@ -72,6 +72,13 @@ describe('Read tasks', () => {
 			.send()
 			.expect(404);
 	});
+	it('Should return all tasks', async () => {
+		const response = await request(app)
+			.get(`/tasks/all`)
+			.send()
+			.expect(200);
+		expect(response.body.length).toBe(2);
+	});
 });
 
 describe('Updating Tasks', () => {
