@@ -2,29 +2,13 @@ const request = require('supertest');
 const mongoose = require('mongoose');
 const app = require('../src/app');
 const Task = require('../src/models/task');
-
-const taskOne = {
-	_id: new mongoose.Types.ObjectId(),
-	title: 'task one',
-};
-
-const taskTwo = {
-	_id: new mongoose.Types.ObjectId(),
-	title: 'task two',
-	description: 'this task is set to complete',
-	completed: true,
-};
+const { setUpDatabase, userOne, userTwo, taskOne, taskTwo } = require('./setupTests');
 
 const newTask = {
 	_id: new mongoose.Types.ObjectId(),
 	title: 'new task',
 	description: 'this task is new',
-};
-
-const setUpDatabase = async () => {
-	await Task.deleteMany();
-	await new Task(taskOne).save();
-	await new Task(taskTwo).save();
+	owner: userOne._id,
 };
 
 describe('Adding task', () => {
@@ -45,9 +29,40 @@ describe('Adding task', () => {
 			.post('/task')
 			.send({
 				_id: id,
+				description: "This task doesn't have an owner",
+			})
+			.expect(400);
+
+		const task = await Task.findById(id);
+		expect(task).toBeNull();
+	});
+
+	it("Should not add a task that doesn't have an owner", async () => {
+		const id = new mongoose.Types.ObjectId();
+		await request(app)
+			.post('/task')
+			.send({
+				_id: id,
+				title: 'new task title',
 				description: "This task doesn't have a title",
 			})
-			.send()
+			.expect(400);
+
+		const task = await Task.findById(id);
+		expect(task).toBeNull();
+	});
+
+	it("Should not add a task that doesn't have a valid owner", async () => {
+		const id = new mongoose.Types.ObjectId();
+		const owner = new mongoose.Types.ObjectId();
+		await request(app)
+			.post('/task')
+			.send({
+				_id: id,
+				title: 'new task title',
+				description: "This task doesn't have a title",
+				owner,
+			})
 			.expect(400);
 
 		const task = await Task.findById(id);
@@ -72,6 +87,7 @@ describe('Read tasks', () => {
 			.send()
 			.expect(404);
 	});
+
 	it('Should return all tasks', async () => {
 		const response = await request(app)
 			.get(`/tasks/all`)

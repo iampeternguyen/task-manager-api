@@ -2,6 +2,7 @@ const request = require('supertest');
 const mongoose = require('mongoose');
 const app = require('../src/app');
 const User = require('../src/models/user');
+const { setUpDatabase, userOne, userTwo } = require('./setupTests');
 
 const newUser = {
 	_id: new mongoose.Types.ObjectId(),
@@ -9,27 +10,6 @@ const newUser = {
 	email: 'peter@example.com',
 	password: '12345678',
 };
-
-const userOne = {
-	_id: new mongoose.Types.ObjectId(),
-	name: 'User One',
-	email: 'userone@example.com',
-	password: '12345678',
-};
-
-const userTwo = {
-	_id: new mongoose.Types.ObjectId(),
-	name: 'User Two',
-	email: 'userTwo@example.com',
-	password: '12345678',
-};
-
-const setUpDatabase = async () => {
-	await User.deleteMany();
-	await new User(userOne).save();
-	await new User(userTwo).save();
-};
-
 describe('Adding Users', () => {
 	beforeEach(setUpDatabase);
 
