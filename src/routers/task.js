@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Task = require('../models/task');
 
-router.post('/task', async (req, res) => {
+router.post('/tasks/', async (req, res) => {
 	const task = new Task(req.body);
 	try {
 		await task.save();
@@ -24,7 +24,7 @@ router.get('/tasks/all', async (req, res) => {
 	}
 });
 
-router.get('/task/:id', async (req, res) => {
+router.get('/tasks/:id', async (req, res) => {
 	try {
 		const task = await Task.findById(req.params.id);
 		if (!task) {
@@ -36,7 +36,7 @@ router.get('/task/:id', async (req, res) => {
 	}
 });
 
-router.patch('/task/:id', async (req, res) => {
+router.patch('/tasks/:id', async (req, res) => {
 	const allowedUpdates = ['title', 'description', 'completed'];
 	const updates = Object.keys(req.body);
 	const isValidUpdate = updates.every(update => allowedUpdates.includes(update));
@@ -57,7 +57,7 @@ router.patch('/task/:id', async (req, res) => {
 	}
 });
 
-router.delete('/task/:id', async (req, res) => {
+router.delete('/tasks/:id', async (req, res) => {
 	const id = req.params.id;
 	try {
 		const task = await Task.findByIdAndDelete(id);

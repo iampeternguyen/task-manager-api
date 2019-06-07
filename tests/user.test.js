@@ -22,14 +22,14 @@ describe('Adding Users', () => {
 
 	test('Should connect to user route and return 201 status for new user', async () => {
 		await request(app)
-			.post('/user')
+			.post('/users')
 			.send(newUser)
 			.expect(201);
 	});
 
 	test('Should return user that matches orginal', async () => {
 		const response = await request(app)
-			.post('/user')
+			.post('/users')
 			.send(newUser);
 
 		expect(response.body).toMatchObject({ name: newUser.name, email: newUser.email });
@@ -37,7 +37,7 @@ describe('Adding Users', () => {
 
 	test('Should save user to database', async () => {
 		await request(app)
-			.post('/user')
+			.post('/users')
 			.send(newUser);
 		const user = await User.findById(newUser._id);
 		expect(user).not.toBeNull();
@@ -52,7 +52,7 @@ describe('Adding Users', () => {
 		};
 
 		await request(app)
-			.post('/user')
+			.post('/users')
 			.send(dupUser)
 			.expect(400);
 
@@ -67,7 +67,7 @@ describe('Adding Users', () => {
 
 	test('Should not add users with invalid emails', async () => {
 		await request(app)
-			.post('/user')
+			.post('/users')
 			.send({
 				_id: new mongoose.Types.ObjectId(),
 				name: 'Peter',
@@ -83,7 +83,7 @@ describe('Reading Users', () => {
 	beforeEach(async () => {
 		await setUpDatabase();
 		response = await request(app)
-			.get(`/user/${userOne._id}`)
+			.get(`/users/${userOne._id}`)
 			.send();
 	});
 
@@ -97,7 +97,7 @@ describe('Reading Users', () => {
 
 	test('Should return 404 for invalid id', async () => {
 		await request(app)
-			.get(`/user/${new mongoose.Types.ObjectId()}`)
+			.get(`/users/${new mongoose.Types.ObjectId()}`)
 			.send()
 			.expect(404);
 	});
@@ -110,7 +110,7 @@ describe('Updating Users', () => {
 		const userBefore = await User.findById(userOne._id);
 
 		await request(app)
-			.patch(`/user/${userOne._id}`)
+			.patch(`/users/${userOne._id}`)
 			.send({ name: 'New Name', email: 'newemail@example.com', password: 'newpass1234' })
 			.expect(200);
 
@@ -124,7 +124,7 @@ describe('Updating Users', () => {
 	test('Should not be able to update user id', async () => {
 		const userBefore = await User.findOne({ email: userOne.email });
 		await request(app)
-			.patch(`/user/${userOne._id}`)
+			.patch(`/users/${userOne._id}`)
 			.send({ _id: new mongoose.Types.ObjectId() })
 			.expect(400);
 		const userAfter = await User.findOne({ email: userOne.email });
@@ -133,7 +133,7 @@ describe('Updating Users', () => {
 
 	test('Should encrypt password', async () => {
 		await request(app)
-			.patch(`/user/${userOne._id}`)
+			.patch(`/users/${userOne._id}`)
 			.send({ password: 'newpass1234' })
 			.expect(200);
 		const user = await User.findById(userOne._id);
@@ -142,7 +142,7 @@ describe('Updating Users', () => {
 
 	test('Should return 404 for invalid id', async () => {
 		await request(app)
-			.patch(`/user/${new mongoose.Types.ObjectId()}`)
+			.patch(`/users/${new mongoose.Types.ObjectId()}`)
 			.send({ email: 'newemail@example.com' })
 			.expect(404);
 	});
@@ -152,7 +152,7 @@ describe('Deleting User', () => {
 	beforeEach(setUpDatabase);
 	test('Should delete user by id', async () => {
 		await request(app)
-			.delete(`/user/${userOne._id}`)
+			.delete(`/users/${userOne._id}`)
 			.expect(200);
 
 		const user = await User.findById(userOne._id);
@@ -161,7 +161,7 @@ describe('Deleting User', () => {
 
 	test('Should return 404 for invalid id', async () => {
 		await request(app)
-			.delete(`/user/${new mongoose.Types.ObjectId()}`)
+			.delete(`/users/${new mongoose.Types.ObjectId()}`)
 			.send()
 			.expect(404);
 	});

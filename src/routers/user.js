@@ -3,7 +3,7 @@ const router = express.Router();
 
 const User = require('../models/user');
 
-router.post('/user', async (req, res) => {
+router.post('/users', async (req, res) => {
 	const user = new User(req.body);
 	try {
 		await user.save();
@@ -13,7 +13,7 @@ router.post('/user', async (req, res) => {
 	}
 });
 
-router.get('/user/:id', async (req, res) => {
+router.get('/users/:id', async (req, res) => {
 	const id = req.params.id;
 	const user = await User.findById(id);
 
@@ -23,7 +23,7 @@ router.get('/user/:id', async (req, res) => {
 	res.send(user);
 });
 
-router.patch('/user/:id', async (req, res) => {
+router.patch('/users/:id', async (req, res) => {
 	const id = req.params.id;
 	const allowedUpdates = ['name', 'email', 'password'];
 	const updates = Object.keys(req.body);
@@ -48,7 +48,7 @@ router.patch('/user/:id', async (req, res) => {
 	}
 });
 
-router.delete('/user/:id', async (req, res) => {
+router.delete('/users/:id', async (req, res) => {
 	const id = req.params.id;
 	try {
 		const user = await User.findByIdAndDelete(id);
