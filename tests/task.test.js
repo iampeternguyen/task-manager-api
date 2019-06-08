@@ -77,7 +77,7 @@ describe('Read tasks', () => {
 			.get(`/tasks/${taskOne._id}`)
 			.send()
 			.expect(200);
-		expect(response.body).toMatchObject({ title: taskOne.title });
+		expect(response.body.task).toMatchObject({ title: taskOne.title });
 	});
 
 	it('Should return 404 for invalid id', async () => {
@@ -100,7 +100,7 @@ describe('Read tasks', () => {
 			.get(`/tasks`)
 			.send({ user: userOne })
 			.expect(200);
-		expect(response.body.length).toBe(1);
+		expect(response.body.tasks.length).toBe(1);
 	});
 });
 

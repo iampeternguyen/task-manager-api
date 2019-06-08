@@ -6,7 +6,7 @@ router.post('/tasks/', async (req, res) => {
 	const task = new Task(req.body);
 	try {
 		await task.save();
-		res.status(201).send(task);
+		res.status(201).send({ task });
 	} catch (error) {
 		res.status(400).send();
 	}
@@ -18,7 +18,7 @@ router.get('/tasks', async (req, res) => {
 		if (!tasks) {
 			res.status(404).send;
 		}
-		res.send(tasks);
+		res.send({ tasks });
 	} catch (error) {
 		res.status(404).send();
 	}
@@ -30,7 +30,7 @@ router.get('/tasks/:id', async (req, res) => {
 		if (!task) {
 			return res.status(404).send();
 		}
-		res.send(task);
+		res.send({ task });
 	} catch (error) {
 		res.status(500).send();
 	}
@@ -51,7 +51,7 @@ router.patch('/tasks/:id', async (req, res) => {
 		updates.forEach(update => (task[update] = req.body[update]));
 
 		await task.save();
-		res.send(task);
+		res.send({ task });
 	} catch (error) {
 		res.status(500).send();
 	}
@@ -64,7 +64,7 @@ router.delete('/tasks/:id', async (req, res) => {
 		if (!task) {
 			return res.status(404).send();
 		}
-		res.send(task);
+		res.send({ task });
 	} catch (error) {
 		res.status(400).send();
 	}
