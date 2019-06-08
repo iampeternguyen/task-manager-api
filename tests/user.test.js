@@ -2,6 +2,8 @@ const request = require('supertest');
 const mongoose = require('mongoose');
 const app = require('../src/app');
 const User = require('../src/models/user');
+const jwt = require('jsonwebtoken');
+
 const { setUpDatabase, userOne, userTwo } = require('./setupTests');
 
 const newUser = {
@@ -33,7 +35,7 @@ describe('Adding Users', () => {
 			.post('/users')
 			.send(newUser);
 
-		expect(response.body).toMatchObject({ name: newUser.name, email: newUser.email });
+		expect(response.body.user).toMatchObject({ name: newUser.name, email: newUser.email });
 	});
 
 	test('Should save user to database', async () => {
@@ -89,11 +91,11 @@ describe('Reading Users', () => {
 	});
 
 	test('Should be able to read user by ID', async () => {
-		expect(userOne.email).toBe(response.body.email);
+		expect(userOne.email).toBe(response.body.user.email);
 	});
 
 	test('Should not return password', async () => {
-		expect(response.body.password).toBeUndefined();
+		expect(response.body.user.password).toBeUndefined();
 	});
 
 	test('Should return 404 for invalid id', async () => {
@@ -165,5 +167,39 @@ describe('Deleting User', () => {
 			.delete(`/users/${new mongoose.Types.ObjectId()}`)
 			.send()
 			.expect(404);
+	});
+});
+
+describe('Authenticating Users', () => {
+	beforeEach(setUpDatabase);
+
+	test('Should return user when logging in', async () => {
+		const response = await request(app)
+			.post(`/users/login`)
+			.send({ email: userOne.email, password: userOne.password })
+			.expect(200);
+		expect(response.body.user._id).toBe(userOne._id.toString());
+	});
+
+	test('Should return 400 if incorrect password or email', async () => {
+		await request(app)
+			.post(`/users/login`)
+			.send({ email: userOne.email, password: '1309894138909' })
+			.expect(400);
+		await request(app)
+			.post(`/users/login`)
+			.send({ email: 'lajkekf@flek.com', password: userOne.password })
+			.expect(400);
+	});
+
+	test('Should create add a token to the tokens array on user when logging in', async () => {
+		const response = await request(app)
+			.post('/users/login')
+			.send({ email: userOne.email, password: userOne.password });
+
+		expect(response.body.user.tokens.length).toBe(1);
+		expect(await jwt.verify(response.body.user.tokens[0].token, process.env.JWT_SECRET)._id).toBe(
+			userOne._id.toString()
+		);
 	});
 });
