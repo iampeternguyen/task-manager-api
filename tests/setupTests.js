@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
-require('../src/db/mongoose');
+const app = require('../src/app'); // keep this here to connect to mongodb
+const request = require('supertest');
+
 const User = require('../src/models/user');
 const Task = require('../src/models/task');
 
@@ -31,6 +33,14 @@ const taskTwo = {
 	owner: userTwo._id,
 };
 
+const authorizedUserOneToken = async () => {
+	let tokenResponse = await request(app)
+		.post('/users/login')
+		.send({ email: userOne.email, password: userOne.password });
+	const token = tokenResponse.body.token;
+	return `Bearer ${token}`;
+};
+
 const setUpDatabase = async () => {
 	await User.deleteMany();
 	await Task.deleteMany();
@@ -42,6 +52,7 @@ const setUpDatabase = async () => {
 
 module.exports = {
 	setUpDatabase,
+	authorizedUserOneToken,
 	userOne,
 	userTwo,
 	taskOne,

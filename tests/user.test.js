@@ -4,7 +4,7 @@ const app = require('../src/app');
 const User = require('../src/models/user');
 const jwt = require('jsonwebtoken');
 
-const { setUpDatabase, userOne, userTwo } = require('./setupTests');
+const { setUpDatabase, userOne, authorizedUserOneToken } = require('./setupTests');
 
 const newUser = {
 	_id: new mongoose.Types.ObjectId(),
@@ -83,14 +83,16 @@ describe('Adding Users', () => {
 
 describe('Reading Users', () => {
 	let response;
-	beforeEach(async () => {
+	beforeAll(async () => {
 		await setUpDatabase();
+		const authToken = await authorizedUserOneToken();
 		response = await request(app)
-			.get(`/users/${userOne._id}`)
+			.get('/users/me')
+			.set('Authorization', authToken)
 			.send();
 	});
 
-	test('Should be able to read user by ID', async () => {
+	test('Should be able to get user profile when authenticated', async () => {
 		expect(userOne.email).toBe(response.body.user.email);
 	});
 
@@ -111,9 +113,10 @@ describe('Updating Users', () => {
 
 	test('Should be able to update user name, email, and password by id', async () => {
 		const userBefore = await User.findById(userOne._id);
-
+		const authToken = await authorizedUserOneToken();
 		await request(app)
-			.patch(`/users/${userOne._id}`)
+			.patch('/users/me')
+			.set('Authorization', authToken)
 			.send({ name: 'New Name', email: 'newemail@example.com', password: 'newpass1234' })
 			.expect(200);
 
@@ -126,8 +129,12 @@ describe('Updating Users', () => {
 
 	test('Should not be able to update user id', async () => {
 		const userBefore = await User.findOne({ email: userOne.email });
+		const authToken = await authorizedUserOneToken();
+
 		await request(app)
-			.patch(`/users/${userOne._id}`)
+			.patch(`/users/me`)
+			.set('Authorization', authToken)
+
 			.send({ _id: new mongoose.Types.ObjectId() })
 			.expect(400);
 		const userAfter = await User.findOne({ email: userOne.email });
@@ -135,38 +142,31 @@ describe('Updating Users', () => {
 	});
 
 	test('Should encrypt password', async () => {
+		const authToken = await authorizedUserOneToken();
+
 		await request(app)
-			.patch(`/users/${userOne._id}`)
+			.patch(`/users/me`)
+			.set('Authorization', authToken)
 			.send({ password: 'newpass1234' })
 			.expect(200);
 		const user = await User.findById(userOne._id);
 		expect(user.password).not.toBe('newpass1234');
 	});
-
-	test('Should return 404 for invalid id', async () => {
-		await request(app)
-			.patch(`/users/${new mongoose.Types.ObjectId()}`)
-			.send({ email: 'newemail@example.com' })
-			.expect(404);
-	});
 });
 
 describe('Deleting User', () => {
 	beforeEach(setUpDatabase);
-	test('Should delete user by id', async () => {
+	test('Should delete user when authenticated', async () => {
+		const authToken = await authorizedUserOneToken();
+
 		await request(app)
-			.delete(`/users/${userOne._id}`)
+			.delete(`/users/me`)
+			.set('Authorization', authToken)
+			.send()
 			.expect(200);
 
 		const user = await User.findById(userOne._id);
 		expect(user).toBeNull();
-	});
-
-	test('Should return 404 for invalid id', async () => {
-		await request(app)
-			.delete(`/users/${new mongoose.Types.ObjectId()}`)
-			.send()
-			.expect(404);
 	});
 });
 
@@ -201,5 +201,20 @@ describe('Authenticating Users', () => {
 		expect(await jwt.verify(response.body.user.tokens[0].token, process.env.JWT_SECRET)._id).toBe(
 			userOne._id.toString()
 		);
+	});
+
+	test('Should deny access to everything but login and create user routes', async () => {
+		await request(app)
+			.get(`/users/me`)
+			.send()
+			.expect(401);
+		await request(app)
+			.patch(`/users/me`)
+			.send()
+			.expect(401);
+		await request(app)
+			.delete(`/users/me`)
+			.send()
+			.expect(401);
 	});
 });
