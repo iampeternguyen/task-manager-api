@@ -12,15 +12,15 @@ router.post('/tasks/', async (req, res) => {
 	}
 });
 
-router.get('/tasks/all', async (req, res) => {
+router.get('/tasks', async (req, res) => {
 	try {
-		const tasks = await Task.find({});
+		const tasks = await Task.find({ owner: req.body.user._id });
 		if (!tasks) {
-			return res.status(404).send();
+			res.status(404).send;
 		}
 		res.send(tasks);
 	} catch (error) {
-		res.status(500).send();
+		res.status(404).send();
 	}
 });
 

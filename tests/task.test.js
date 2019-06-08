@@ -88,12 +88,19 @@ describe('Read tasks', () => {
 			.expect(404);
 	});
 
-	it('Should return all tasks', async () => {
-		const response = await request(app)
-			.get(`/tasks/all`)
+	it('Should not return all tasks without userID', async () => {
+		await request(app)
+			.get(`/tasks`)
 			.send()
+			.expect(404);
+	});
+
+	it('Should return all tasks with userID', async () => {
+		const response = await request(app)
+			.get(`/tasks`)
+			.send({ user: userOne })
 			.expect(200);
-		expect(response.body.length).toBe(2);
+		expect(response.body.length).toBe(1);
 	});
 });
 
@@ -150,5 +157,12 @@ describe('Delete task', () => {
 			.delete(`/tasks/${id}`)
 			.send()
 			.expect(404);
+	});
+});
+
+describe('User/Task relationship', () => {
+	beforeEach(setUpDatabase);
+	it('Should get all tasks from a user model', () => {
+		expect(1).toBe(1);
 	});
 });

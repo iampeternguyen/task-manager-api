@@ -10,6 +10,7 @@ const newUser = {
 	email: 'peter@example.com',
 	password: '12345678',
 };
+
 describe('Adding Users', () => {
 	beforeEach(setUpDatabase);
 

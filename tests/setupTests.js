@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+require('../src/db/mongoose');
 const User = require('../src/models/user');
 const Task = require('../src/models/task');
 
@@ -33,7 +34,6 @@ const taskTwo = {
 const setUpDatabase = async () => {
 	await User.deleteMany();
 	await Task.deleteMany();
-
 	await new User(userOne).save();
 	await new User(userTwo).save();
 	await new Task(taskOne).save();
