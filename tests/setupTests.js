@@ -41,6 +41,14 @@ const authorizedUserOneToken = async () => {
 	return `Bearer ${token}`;
 };
 
+const authorizedUserTwoToken = async () => {
+	let tokenResponse = await request(app)
+		.post('/users/login')
+		.send({ email: userTwo.email, password: userTwo.password });
+	const token = tokenResponse.body.token;
+	return `Bearer ${token}`;
+};
+
 const setUpDatabase = async () => {
 	await User.deleteMany();
 	await Task.deleteMany();
@@ -53,6 +61,7 @@ const setUpDatabase = async () => {
 module.exports = {
 	setUpDatabase,
 	authorizedUserOneToken,
+	authorizedUserTwoToken,
 	userOne,
 	userTwo,
 	taskOne,
