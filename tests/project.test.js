@@ -12,6 +12,7 @@ const {
 	listOne,
 	listTwo,
 	projectOne,
+	projectTwo,
 	authorizedUserOneToken,
 	authorizedUserTwoToken,
 } = require('./setupTests');
@@ -75,18 +76,61 @@ describe('Reading Projects', () => {
 	test('Should read all projects for user', async () => {
 		const authToken = await authorizedUserOneToken();
 		const response = await request(app)
-			.get(`/projects/${projectOne._id}`)
+			.get(`/projects`)
 			.set('Authorization', authToken)
 			.expect(200);
 		expect(response.body.projects.length).toBe(1);
 	});
 });
 
-// describe('Updating Projects', () => {
-// 	beforeEach(setUpDatabase)
+describe('Updating Projects', () => {
+	beforeEach(setUpDatabase);
 
-// 	test('Should update name of project', async () => {
-// 		const authToken = await authorizedUserOneToken()
-// 		await request(app).patch(`/projects/$`)
-// 	})
-// })
+	test('Should update name of project by id', async () => {
+		const authToken = await authorizedUserOneToken();
+		await request(app)
+			.patch(`/projects/${projectOne._id}`)
+			.set('Authorization', authToken)
+			.send({ name: 'new project name' })
+			.expect(200);
+		const project = await Project.findById(projectOne._id);
+		expect(project.name).not.toBe(projectOne.name);
+	});
+
+	test('Should not update project if changing unauthorized field like id', async () => {
+		const authToken = await authorizedUserOneToken();
+		await request(app)
+			.patch(`/projects/${projectOne._id}`)
+			.set('Authorization', authToken)
+			.send({ _id: new mongoose.Types.ObjectId(), name: 'new project name' })
+			.expect(400);
+		const project = await Project.findById(projectOne._id);
+		expect(project.name).toBe(projectOne.name);
+	});
+});
+
+describe('Deleting Projects', () => {
+	beforeEach(setUpDatabase);
+
+	test('Should delete project by ID with authorized user', async () => {
+		const authToken = await authorizedUserTwoToken();
+		await request(app)
+			.delete(`/projects/${projectTwo._id}`)
+			.set('Authorization', authToken)
+			.send()
+			.expect(200);
+		const project = await Project.findById(projectTwo._id);
+		expect(project).toBeNull();
+	});
+
+	test('Should not delete project by ID with unauthorized user', async () => {
+		const authToken = await authorizedUserTwoToken();
+		await request(app)
+			.delete(`/projects/${projectOne._id}`)
+			.set('Authorization', authToken)
+			.send()
+			.expect(400);
+		const project = await Project.findById(projectOne._id);
+		expect(project).not.toBeNull();
+	});
+});
