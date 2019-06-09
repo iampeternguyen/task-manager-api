@@ -12,6 +12,9 @@ app.use(userRouter);
 const taskRouter = require('./routers/task');
 app.use(taskRouter);
 
+const projectRouter = require('./routers/project');
+app.use(projectRouter);
+
 app.get('/', (req, res) => {
 	res.send(
 		'This is the backend API for a task manager app. To see the full source code go to https://github.com/iampeternguyen/task-manager-api'

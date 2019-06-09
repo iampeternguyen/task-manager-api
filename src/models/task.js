@@ -27,7 +27,6 @@ const taskSchema = mongoose.Schema(
 		},
 		display_order: {
 			type: Number,
-			required: true,
 		},
 	},
 	{ timestamps: true }

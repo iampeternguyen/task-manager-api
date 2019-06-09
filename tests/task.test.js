@@ -8,6 +8,9 @@ const {
 	userTwo,
 	taskOne,
 	taskTwo,
+	listOne,
+	listTwo,
+	projectOne,
 	authorizedUserOneToken,
 	authorizedUserTwoToken,
 } = require('./setupTests');
@@ -16,6 +19,7 @@ const newTask = {
 	_id: new mongoose.Types.ObjectId(),
 	title: 'new task',
 	description: 'this task is new',
+	list: listOne._id,
 };
 
 describe('Adding task', () => {
