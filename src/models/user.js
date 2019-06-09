@@ -27,6 +27,14 @@ const userSchema = mongoose.Schema(
 			trim: true,
 			minlength: 8,
 		},
+		projects: [
+			{
+				project: {
+					type: mongoose.Schema.ObjectId,
+					ref: 'Project',
+				},
+			},
+		],
 		tokens: [
 			{
 				token: {

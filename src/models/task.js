@@ -20,6 +20,15 @@ const taskSchema = mongoose.Schema(
 			required: true,
 			ref: 'User',
 		},
+		list: {
+			type: mongoose.Schema.ObjectId,
+			required: true,
+			ref: 'List',
+		},
+		display_order: {
+			type: Number,
+			required: true,
+		},
 	},
 	{ timestamps: true }
 );
