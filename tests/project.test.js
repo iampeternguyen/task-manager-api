@@ -134,3 +134,28 @@ describe('Deleting Projects', () => {
 		expect(project).not.toBeNull();
 	});
 });
+
+describe('Project authentication', () => {
+	test('Should deny access to all project routes if not authenticated', async () => {
+		await request(app)
+			.get(`/projects`)
+			.send()
+			.expect(401);
+		await request(app)
+			.post(`/projects`)
+			.send()
+			.expect(401);
+		await request(app)
+			.get(`/projects/${projectOne._id}`)
+			.send()
+			.expect(401);
+		await request(app)
+			.patch(`/projects/${projectOne._id}`)
+			.send()
+			.expect(401);
+		await request(app)
+			.delete(`/projects/${projectOne._id}`)
+			.send()
+			.expect(401);
+	});
+});

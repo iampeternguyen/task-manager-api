@@ -27,7 +27,7 @@ router.get('/users/me', auth, async (req, res) => {
 	res.send({ user: req.user });
 });
 
-router.patch('/users/:id', auth, async (req, res) => {
+router.patch('/users/me', auth, async (req, res) => {
 	const allowedUpdates = ['name', 'email', 'password'];
 	const updates = Object.keys(req.body);
 	const isValidUpdate = updates.every(update => allowedUpdates.includes(update));

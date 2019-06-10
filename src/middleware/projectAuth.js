@@ -2,7 +2,7 @@ const Project = require('../models/project');
 
 const projectAuth = async (req, res, next) => {
 	try {
-		const project = await Project.findById(req.params.id);
+		const project = await Project.findById(req.params.project);
 		let isAuthorized = project.owner.toString() === req.user._id.toString();
 		// check if teammember
 		if (!isAuthorized) {

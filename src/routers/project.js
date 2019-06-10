@@ -24,7 +24,7 @@ router.get('/projects', auth, async (req, res) => {
 	}
 });
 
-router.get('/projects/:id', auth, projectAuth, (req, res) => {
+router.get('/projects/:project', auth, projectAuth, (req, res) => {
 	try {
 		res.send({ project: req.project });
 	} catch (error) {
@@ -32,7 +32,7 @@ router.get('/projects/:id', auth, projectAuth, (req, res) => {
 	}
 });
 
-router.patch('/projects/:id', auth, projectAuth, async (req, res) => {
+router.patch('/projects/:project', auth, projectAuth, async (req, res) => {
 	try {
 		const updatable = ['name'];
 		const updates = Object.keys(req.body);
@@ -48,7 +48,7 @@ router.patch('/projects/:id', auth, projectAuth, async (req, res) => {
 	}
 });
 
-router.delete('/projects/:id', auth, projectAuth, async (req, res) => {
+router.delete('/projects/:project', auth, projectAuth, async (req, res) => {
 	try {
 		const project = await req.project.remove();
 		res.send({ project });
