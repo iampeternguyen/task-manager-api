@@ -22,9 +22,9 @@ describe('Adding Lists', () => {
 	beforeAll(setUpDatabase);
 	test('Should allow authenticated user to add list to project', async () => {
 		const authToken = await authorizedUserOneToken();
-		const newList = { _id: new mongoose.Types.ObjectId(), name: 'new list category' };
+		const newList = { _id: new mongoose.Types.ObjectId(), name: 'new list category', project: projectOne._id };
 		await request(app)
-			.post(`/projects/${projectOne._id}/lists`)
+			.post(`/lists`)
 			.set('Authorization', authToken)
 			.send(newList)
 			.expect(201);
@@ -34,10 +34,13 @@ describe('Adding Lists', () => {
 
 	test('Should not add list if invalid project id ', async () => {
 		const authToken = await authorizedUserOneToken();
-		const id = new mongoose.Types.ObjectId();
-		const newList = { _id: new mongoose.Types.ObjectId(), name: 'new list category' };
+		const newList = {
+			_id: new mongoose.Types.ObjectId(),
+			name: 'new list category',
+			project: new mongoose.Types.ObjectId(),
+		};
 		await request(app)
-			.post(`/projects/${id}/lists`)
+			.post(`/lists`)
 			.set('Authorization', authToken)
 			.send(newList)
 			.expect(400);
@@ -51,7 +54,7 @@ describe('Reading Lists', () => {
 	test('Should get individual list', async () => {
 		const authToken = await authorizedUserOneToken();
 		const response = await request(app)
-			.get(`/projects/${projectOne._id}/lists/${listOne._id}`)
+			.get(`/lists/${listOne._id}`)
 			.set('Authorization', authToken)
 			.send()
 			.expect(200);
@@ -61,7 +64,7 @@ describe('Reading Lists', () => {
 	test('Should get all lists ', async () => {
 		const authToken = await authorizedUserOneToken();
 		const response = await request(app)
-			.get(`/projects/${projectOne._id}/lists`)
+			.get(`/lists?project=${projectOne._id}`)
 			.set('Authorization', authToken)
 			.send()
 			.expect(200);
@@ -74,7 +77,7 @@ describe('Updating List', () => {
 	test('Should update list name', async () => {
 		const authToken = await authorizedUserOneToken();
 		const response = await request(app)
-			.patch(`/projects/${projectOne._id}/lists/${listOne._id}`)
+			.patch(`/lists/${listOne._id}`)
 			.set('Authorization', authToken)
 			.send({ name: 'new list name' })
 			.expect(200);
@@ -91,21 +94,22 @@ describe('Updating List', () => {
 			.expect(201);
 
 		const response = await request(app)
-			.patch(`/projects/${projectOne._id}/lists/${listOne._id}`)
+			.patch(`/lists/${listOne._id}`)
 			.set('Authorization', authToken)
-			.send({ name: 'new list name' })
+			.send({ name: 'new list name', project: projectOne._id })
 			.expect(200);
 		expect(response.body.list.project).not.toBe(listOne.project);
 	});
 
 	test("Should not be able to update the list project if project doesn't belong to user", async () => {
 		const authToken = await authorizedUserOneToken();
-		const response = await request(app)
-			.patch(`/projects/${projectOne._id}/lists/${listOne._id}`)
+		await request(app)
+			.patch(`/lists/${listOne._id}`)
 			.set('Authorization', authToken)
 			.send({ name: 'new list name', project: projectTwo._id })
-			.expect(200);
-		expect(response.body.list.project).toBe(listOne.project.toString());
+			.expect(400);
+		const list = await List.findById(listOne._id);
+		expect(list.project.toString()).toBe(listOne.project.toString());
 	});
 });
 
@@ -114,7 +118,7 @@ describe('Delete list', () => {
 	test('Should delete list', async () => {
 		const authToken = await authorizedUserOneToken();
 		await request(app)
-			.delete(`/projects/${projectOne._id}/lists/${listOne._id}`)
+			.delete(`/lists/${listOne._id}`)
 			.set('Authorization', authToken)
 			.send()
 			.expect(200);

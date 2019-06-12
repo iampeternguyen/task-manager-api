@@ -17,25 +17,51 @@ router.post(`/projects/:project/lists`, auth, projectAuth, async (req, res) => {
 	}
 });
 
-router.get(`/projects/:project/lists`, auth, projectAuth, async (req, res) => {
+router.post(`/lists`, auth, async (req, res) => {
 	try {
-		const lists = await List.find({ project: req.project._id });
+		const list = new List(req.body);
+		if (!(await list.userIsProjectOwner(req.user._id))) {
+			throw new Error();
+		}
+		await list.save();
+		res.status(201).send(list);
+	} catch (error) {
+		res.status(400).send();
+	}
+});
+
+router.get(`/lists`, auth, async (req, res) => {
+	try {
+		const lists = await List.find({ project: req.query.project });
+		if (!lists[0].userIsProjectOwner(req.user._id)) {
+			throw new Error();
+		}
 		res.send({ lists });
 	} catch (error) {
 		res.status(400).send();
 	}
 });
 
-router.get(`/projects/:project/lists/:list`, auth, projectAuth, listAuth, async (req, res) => {
+router.get(`/lists/:list`, auth, async (req, res) => {
+	const list = await List.findById(req.params.list);
+
 	try {
-		res.send({ list: req.list });
+		if (!list.userIsProjectOwner(req.user._id)) {
+			throw new Error();
+		}
+		res.send({ list });
 	} catch (error) {
 		res.status(400).send();
 	}
 });
 
-router.patch(`/projects/:project/lists/:list`, auth, projectAuth, listAuth, async (req, res) => {
+router.patch(`/lists/:list`, auth, async (req, res) => {
 	try {
+		const list = await List.findById(req.params.list);
+		if (!list.userIsProjectOwner(req.user._id)) {
+			throw new Error();
+		}
+
 		const updateable = ['name', 'project'];
 		const updates = Object.keys(req.body);
 		const isValidUpdate = updates.every(update => updateable.includes(update));
@@ -43,27 +69,31 @@ router.patch(`/projects/:project/lists/:list`, auth, projectAuth, listAuth, asyn
 			throw new Error();
 		}
 
-		updates.forEach(async update => {
-			if (update === 'project') {
-				const project = await Project.findById(req.body[update]);
-				if (!project.owner.toString() === req.user._id) {
-					throw new Error();
-				}
+		if (req.body.project) {
+			const project = await Project.findById(req.body.project);
+			if (!project.userIsProjectOwner(req.user._id)) {
+				throw new Error();
 			}
-			req.list[update] = req.body[update];
+		}
+
+		updates.forEach(update => {
+			list[update] = req.body[update];
 		});
 
-		await req.list.save();
-
-		res.send({ list: req.list });
+		await list.save();
+		res.send({ list });
 	} catch (error) {
 		res.status(400).send();
 	}
 });
 
-router.delete(`/projects/:project/lists/:list`, auth, projectAuth, listAuth, async (req, res) => {
+router.delete(`/lists/:list`, auth, async (req, res) => {
 	try {
-		const list = await req.list.remove();
+		const list = await List.findById(req.params.list);
+		if (!list.userIsProjectOwner(req.user._id)) {
+			throw new Error();
+		}
+		await list.remove();
 		res.send({ list });
 	} catch (error) {
 		res.status(400).send();

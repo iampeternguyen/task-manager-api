@@ -21,5 +21,9 @@ const projectSchema = mongoose.Schema({
 	},
 });
 
+projectSchema.methods.userIsProjectOwner = function(userId) {
+	return this.owner.toString() === userId.toString();
+};
+
 const Project = mongoose.model('Project', projectSchema);
 module.exports = Project;
