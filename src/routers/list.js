@@ -46,7 +46,7 @@ router.get(`/lists/:list`, auth, async (req, res) => {
 	const list = await List.findById(req.params.list);
 
 	try {
-		if (!list.userIsProjectOwner(req.user._id)) {
+		if (!(await list.userIsProjectOwner(req.user._id))) {
 			throw new Error();
 		}
 		res.send({ list });
@@ -58,7 +58,7 @@ router.get(`/lists/:list`, auth, async (req, res) => {
 router.patch(`/lists/:list`, auth, async (req, res) => {
 	try {
 		const list = await List.findById(req.params.list);
-		if (!list.userIsProjectOwner(req.user._id)) {
+		if (!(await list.userIsProjectOwner(req.user._id))) {
 			throw new Error();
 		}
 
@@ -90,7 +90,7 @@ router.patch(`/lists/:list`, auth, async (req, res) => {
 router.delete(`/lists/:list`, auth, async (req, res) => {
 	try {
 		const list = await List.findById(req.params.list);
-		if (!list.userIsProjectOwner(req.user._id)) {
+		if (!(await list.userIsProjectOwner(req.user._id))) {
 			throw new Error();
 		}
 		await list.remove();
