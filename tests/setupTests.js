@@ -41,10 +41,15 @@ const listOne = {
 
 const listTwo = {
 	_id: new mongoose.Types.ObjectId(),
-	name: 'List one',
+	name: 'List Two',
 	project: projectTwo._id,
 };
 
+const listThree = {
+	_id: new mongoose.Types.ObjectId(),
+	name: 'List three',
+	project: projectOne._id,
+};
 const taskOne = {
 	_id: new mongoose.Types.ObjectId(),
 	title: 'task one',
@@ -63,6 +68,16 @@ const taskTwo = {
 	list: listTwo._id,
 	display_order: 0,
 	owner: userTwo._id,
+};
+
+const taskThree = {
+	_id: new mongoose.Types.ObjectId(),
+	title: 'task three',
+	description: 'this task is set to complete',
+	completed: true,
+	list: listThree,
+	display_order: 0,
+	owner: userOne._id,
 };
 
 const authorizedUserOneToken = async () => {
@@ -92,8 +107,10 @@ const setUpDatabase = async () => {
 	await new Project(projectTwo).save();
 	await new List(listOne).save();
 	await new List(listTwo).save();
+	await new List(listThree).save();
 	await new Task(taskOne).save();
 	await new Task(taskTwo).save();
+	await new Task(taskThree).save();
 };
 
 module.exports = {

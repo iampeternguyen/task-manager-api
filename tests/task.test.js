@@ -2,6 +2,7 @@ const request = require('supertest');
 const mongoose = require('mongoose');
 const app = require('../src/app');
 const Task = require('../src/models/task');
+const List = require('../src/models/list');
 const {
 	setUpDatabase,
 	userOne,
@@ -78,15 +79,38 @@ describe('Read tasks', () => {
 			.expect(404);
 	});
 
-	it('Should return all tasks', async () => {
+	it('Should return all tasks of a list', async () => {
 		const authToken = await authorizedUserOneToken();
 
 		const response = await request(app)
-			.get(`/tasks`)
+			.get(`/tasks?list=${listOne._id}`)
 			.set('Authorization', authToken)
 			.send({ user: userOne })
 			.expect(200);
-		expect(response.body.tasks.length).toBe(1);
+
+		const list = await List.findById(listOne._id);
+		await list.populate('tasks').execPopulate();
+		expect(response.body.tasks.length).toBe(list.tasks.length);
+	});
+
+	it('Should return 400 if invalid list id', async () => {
+		const authToken = await authorizedUserOneToken();
+
+		const response = await request(app)
+			.get(`/tasks?list=${new mongoose.Types.ObjectId()}`)
+			.set('Authorization', authToken)
+			.send({ user: userOne })
+			.expect(400);
+	});
+
+	it('Should return 400 if user not authorized for that list/project', async () => {
+		const authToken = await authorizedUserOneToken();
+
+		const response = await request(app)
+			.get(`/tasks?list=${listTwo._id}`)
+			.set('Authorization', authToken)
+			.send({ user: userOne })
+			.expect(400);
 	});
 });
 

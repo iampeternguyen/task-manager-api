@@ -1,21 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const projectAuth = require('../middleware/projectAuth');
-const listAuth = require('../middleware/listAuth');
 const List = require('../models/list');
 const Project = require('../models/project');
-
-router.post(`/projects/:project/lists`, auth, projectAuth, async (req, res) => {
-	try {
-		const list = new List(req.body);
-		list.project = req.project._id;
-		await list.save();
-		res.status(201).send(list);
-	} catch (error) {
-		res.status(400).send();
-	}
-});
 
 router.post(`/lists`, auth, async (req, res) => {
 	try {

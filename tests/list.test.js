@@ -68,7 +68,7 @@ describe('Reading Lists', () => {
 			.set('Authorization', authToken)
 			.send()
 			.expect(200);
-		expect(response.body.lists.length).toBe(1);
+		expect(response.body.lists.length).toBe(2);
 	});
 });
 

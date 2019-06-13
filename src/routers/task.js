@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Task = require('../models/task');
+const List = require('../models/list');
 const auth = require('../middleware/auth');
 
 router.post('/tasks/', auth, async (req, res) => {
@@ -16,13 +17,15 @@ router.post('/tasks/', auth, async (req, res) => {
 
 router.get('/tasks', auth, async (req, res) => {
 	try {
-		const tasks = await Task.find({ owner: req.user._id });
-		if (!tasks) {
-			res.status(404).send;
+		const list = await List.findById(req.query.list);
+		if (!(await list.userIsProjectOwner(req.user._id))) {
+			throw new Error();
 		}
-		res.send({ tasks });
+		await list.populate('tasks').execPopulate();
+
+		res.send({ tasks: list.tasks });
 	} catch (error) {
-		res.status(404).send();
+		res.status(400).send();
 	}
 });
 

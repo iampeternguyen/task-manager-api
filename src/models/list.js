@@ -13,6 +13,12 @@ const listSchema = mongoose.Schema({
 	},
 });
 
+listSchema.virtual('tasks', {
+	ref: 'Task',
+	localField: '_id',
+	foreignField: 'list',
+});
+
 listSchema.methods.userIsProjectOwner = async function(userId) {
 	const list = this;
 	await list.populate('project').execPopulate();

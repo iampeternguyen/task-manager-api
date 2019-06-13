@@ -8,6 +8,6 @@ describe('User/Task relationship', () => {
 	it('Should get all tasks from a user model', async () => {
 		const user = await User.findById(userOne._id);
 		await user.populate('tasks').execPopulate();
-		expect(user.tasks.length).toBe(1);
+		expect(user.tasks.length).toBe(2);
 	});
 });
